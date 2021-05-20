@@ -18,14 +18,17 @@ It can be used to test the transmission time, graphs with the amount of errors.
 
 # Functionalities
 
--f = frame size
--e = Percentage of error
--i = input file (It must be inside the 'inputs' folder or edit the default path within the 'transmitter.py' file)
+-f   __* frame size *__
+
+-e __* Percentage of error *__
+
+-i = __* input file (It must be inside the 'inputs' folder or edit the default path within the 'transmitter.py' file) *__
 
 # Example:
 
-1- python receptor.py
-2- python transmissor.py -i input4.ppm -f 1024 -e 5
+__(CMD1)__ ./python receptor.py
+
+__(CMD2)__ ./python transmissor.py -i input4.ppm -f 1024 -e 5
 
 to transmit the file "input4.ppm" with frames (Packages) of 1024 Bytes and with a percentage of 5% of error.
 
