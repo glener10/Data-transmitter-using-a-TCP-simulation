@@ -1,36 +1,34 @@
 # Introduction
 
-Simple algorithm for transferring .txt files through UDP Sockets, the same was implemented in python using the libraries:
+Simple algorithm that simulates Socket TCP for transmitting different types of data, such as:
 
-* Hashlib
-* Os
-* Time
-* Random
-* Argparse
-* Datetime
+.ppm
+.png
+.mp3
+.jpg
+etc...
+
 
 
 # Methodology
 
-Through an input file it divides it into blocks of optional size (Frames) and sends these blocks to the server separately, it is possible to generate an error probability to test the algorithm control functionalities. Can be used to test transmission time, graphs with the amount of error and more,it uses Hash to encrypt the blocks.
+Through an input file it divides into blocks of optional size (Frames) and sends these blocks to the server separately, it is possible to generate a probability of error and size of each block (frame) to test the algorithm's control features.
+
+It can be used to test the transmission time, graphs with the amount of errors.
 
 # Functionalities
 
 -f = frame size
 -e = Percentage of error
--i = input file
+-i = input file (It must be inside the 'inputs' folder or edit the default path within the 'transmitter.py' file)
 
-Example:
+# Example:
 
 1- python receptor.py
-2- python transmissor.py -i data.txt -f 1024 -e 5
+2- python transmissor.py -i input4.ppm -f 1024 -e 5
 
-to transmit the file "data.txt" with frames (Packages) of 1024 Bytes and with a percentage of 5% of error.
+to transmit the file "input4.ppm" with frames (Packages) of 1024 Bytes and with a percentage of 5% of error.
 
-A log file ("log.txt") will be generated with the transmission information, where the error occurred, the amount of error, transmission time, etc. And also a file with the entire message received by the recipient ("" message_received_receptor ")
+The sending status of each block will be displayed on the screen, and finally the total transmission time, number of errors and the number of blocks sent.
 
-# Future Ideas
-
-Implement some sliding window method to focus on performance
-
-
+The receiver generates a file with the name 'Output. (Input extension)' with all the content you received from transmitter.py
