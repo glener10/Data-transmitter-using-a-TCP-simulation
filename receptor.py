@@ -1,3 +1,5 @@
+# (C) 2020 Glener Lanes Pizzolato
+
 from socket import *
 import hashlib
 import os
