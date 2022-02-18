@@ -1,26 +1,33 @@
-# (C) 2020 Glener Lanes Pizzolato
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
-from socket import *
-import hashlib
-import os
-import time
-import random
-import argparse
-import datetime
-import numpy as np
-import string
+__author__ = 'All'
+__email__ = '{glenerpizzolato}, @gmail.com'
+#__version__ = '{1}.{0}.{0}'
 
-DEFAULT_FRAME_SIZE = 4						
-DEFAULT_ERROR_PERCENTAGE = 2			#2% a cada pacote de acontecer erro
+try:
+	from socket import *
+	import hashlib
+	import random
+	import argparse
+	import datetime
+	import string
+except ImportError as error:
+	print(error)
+	print("1. Install requirements:")
+	print("  pip install --upgrade pip")
+	print("  pip install -r requirements.txt ")
+	print()
+	exit(-1)
 
-DEFAULT_PATH_INPUT = "./inputs/"
-DEFAULT_INPUT_FILE = "input.txt"
+DEFAULT_FRAME_SIZE = 1024					
+DEFAULT_ERROR_PERCENTAGE = 0			
+DEFAULT_PATH_INPUT = "./inputs/input.txt"
 
-def random_generator(size=6, chars= string.ascii_uppercase + string.digits):	#Gera String aleatorio com tamanho arbitrario
+def random_generator(size=6, chars= string.ascii_uppercase + string.digits):	
 	return ''.join(random.choice(chars) for _ in range(size))
-
 class Transmitter:
-	def __init__(self,serverName,serverPort,frame_size, error_percentage, input_file, extension_data):
+	def __init__(self,serverName,serverPort,frame_size, error_percentage, input_file):
 		self.serverName = serverName
 		self.serverPort = serverPort
 		self.destiny = (serverName, serverPort)
@@ -29,87 +36,92 @@ class Transmitter:
 		self.error_number = 0
 		self.frame_size = frame_size
 
-		self.extension_data = extension_data
+		self.number_of_packages = 0
 
 		self.data = open(input_file,"r")
 		self.data = self.data.read()
-		self.tam_data = len(self.data)
+		self.data_size = len(self.data)
 
-		self.number_of_packages=0
-		self.__read_number_of_packages()
+		self.read_number_of_packages()
 
-
-	def __read_number_of_packages(self):		#Define o numero de pacotes de acordo com o tamanho da entrada
-		for i in range(0,self.tam_data-1,self.frame_size):
+	def read_number_of_packages(self):		
+		for i in range(0,self.data_size-1,self.frame_size):
 			self.number_of_packages += 1
 	
-	def verifica(self, confere,aux):			#Funcao print para informar a situacao de um dado pacote
-		if(confere != " "):	
-			if(confere == "ACK"):
+	def check(self, transmission_check,aux):			
+		if(transmission_check != " "):	
+			if(transmission_check == "ACK"):
 				print ("Sending: %s   Receptor: ACK" %aux)
 			else:
-				if(confere == "NACK"):
+				if(transmission_check == "NACK"):
 					print ("Sending: %s   Receptor: NACK" %aux)
 				else:
 					print ("Sending: %s   Receptor: NACK" %aux)
 		else:
 			print ("Sending: %s   Receptor: NACK" %aux)	
-
 	
-	def send(self):								#Realiza a transmissao
+	def send(self):								
 
-		self.tcp.settimeout(None)
+		try:
+			self.tcp.settimeout(None)
+			self.tcp.sendto(("%s|%s"%(self.number_of_packages,self.frame_size)),self.destiny)		
+		except ImportError as e:
+			print("Error sending number of packets and frame size from file to be transmitted")
 
-		self.tcp.sendto(("%s"%self.number_of_packages),self.destiny)	#Envia o numero de pacotes total para o receptor
-		self.tcp.sendto(("%s"%self.extension_data),self.destiny)	#Envia a extensao do arquivo input
+		for i in range(0,self.data_size-1,self.frame_size):
 
-		for i in range(0,self.tam_data-1,self.frame_size):
-
-			aux_erro = ""
-			confere = ""
+			error_auxiliary = ""
+			transmission_check = ""
 
 			h = hashlib.new('md5')
 			aux = self.data[i:i+self.frame_size]
 			h.update(aux)
 		
-			tempo_espera = random.randrange(1, 101)
+			waiting_time = random.randrange(1, 101)
 
-			if(tempo_espera >= self.error_percentage):		#NAO ACONTECE ERRO, ENVIA HASH E MENSAGEM DE FORMA CORRETE
-				self.tcp.sendto(aux,(self.destiny))			#ENVIA MENSAGEM
-				self.tcp.sendto(h.hexdigest(),(self.destiny))	#ENVIA HASH
-				confere, serverAddress = self.tcp.recvfrom(2048)	#RECEBE CONFIRMACAO DO SERVIDOR
-				self.verifica(confere,aux)
+			if(waiting_time >= self.error_percentage):		
+				self.tcp.sendto(aux,(self.destiny))			
+				self.tcp.sendto(h.hexdigest(),(self.destiny))
+				transmission_check, serverAddress = self.tcp.recvfrom(2048)	
+				self.check(transmission_check,aux)
 			else:
-				while(tempo_espera <= self.error_percentage):	#ACONTECE ERRO, ENVIA HASH E UMA MENSAGEM MODIFICADA (HOUVE ALTERACAO NA MENSAGEM DURANTE A TRANSMISSAO)
-					self.error_number += 1						#OUTRA FORMA DE GERAR ERRO SERIA DEFINIR UM ATRASO NO RECEPTOR (IDEIA DE IMPLEMENTACAO FUTURA)
-					tempo_espera = random.randrange(1, 101)
-					aux_erro = random_generator(self.frame_size)
-					self.tcp.sendto(aux_erro,(self.destiny))
+				while(waiting_time <= self.error_percentage):	
+					self.error_number += 1						
+					waiting_time = random.randrange(1, 101)
+					error_auxiliary = random_generator(self.frame_size)
+					self.tcp.sendto(error_auxiliary,(self.destiny))
 					self.tcp.sendto(h.hexdigest(),(self.destiny))
-					confere, serverAddress = self.tcp.recvfrom(2048)
-					self.verifica(confere,aux)
+					transmission_check, serverAddress = self.tcp.recvfrom(2048)
+					self.check(transmission_check,aux)
 
 				self.tcp.sendto(aux,(self.destiny))
 				self.tcp.sendto(h.hexdigest(),(self.destiny))
-				confere, serverAddress = self.tcp.recvfrom(2048)
-				self.verifica(confere,aux)
+				transmission_check, serverAddress = self.tcp.recvfrom(2048)
+				self.check(transmission_check,aux)
 
 	def close_socket(self):
 		self.tcp.close()
 
 
-# log = open("log.txt","w")
-def main():
-	parser = argparse.ArgumentParser(description='Socket UDP')
+def add_arguments(parser):
 	parser.add_argument("--frame", "-f", help="frame size", default=DEFAULT_FRAME_SIZE, type=int)
 	parser.add_argument("--erro", "-e", help="error percentage", default=DEFAULT_ERROR_PERCENTAGE, type=int)
-	parser.add_argument("--input", "-i", help="input file", default=DEFAULT_INPUT_FILE, type=str)
+	parser.add_argument("--input", "-i", help="input file", default=DEFAULT_PATH_INPUT, type=str)
+	return parser
+
+def main():
+	parser = argparse.ArgumentParser(description='Transmitter Socket UDP')
+	parser = add_arguments(parser)
 	args = parser.parse_args()
 
 	time_begin = datetime.datetime.now()
 
-	Socket = Transmitter("localhost",12000, args.frame, args.erro, DEFAULT_PATH_INPUT + args.input, args.input.split(".")[1])
-	Socket.send()
+	try:
+		transmitter = Transmitter("localhost",12000, args.frame, args.erro, DEFAULT_PATH_INPUT)
+		transmitter.send()
+
+	except ImportError as e:
+		print("Error starting transmission")
 
 	time_end = datetime.datetime.now()
 	time_diff = (time_end - time_begin)
@@ -117,10 +129,11 @@ def main():
 
 	#print ("Final Message sent: %s"%complete_output)
 
-	print ("Number of errors: %d"%Socket.error_number)
-	print ("Number of packages: %d"%Socket.number_of_packages)
+	print ("Number of errors: %d"%transmitter.error_number)
+	print ("Number of packages: %d"%transmitter.number_of_packages)
 	print ("Total time transmition: {}\n".format(time_diff_seconds))
 
-	Socket.close_socket()
+	transmitter.close_socket()
 
-main()
+if __name__ == '__main__':
+	exit(main())

@@ -1,44 +1,47 @@
-# (C) 2020 Glener Lanes Pizzolato
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
-from socket import *
-import hashlib
-import os
-import time
-import random
-import argparse
-import datetime
-import numpy as np
-import string
+__author__ = 'All'
+__email__ = '{glenerpizzolato}, @gmail.com'
+#__version__ = '{1}.{0}.{0}'
 
+try:
+    from socket import *
+    import hashlib
+    import argparse
+
+except ImportError as error:
+	print(error)
+	print("1. Install requirements:")
+	print("  pip install --upgrade pip")
+	print("  pip install -r requirements.txt ")
+	print()
+	exit(-1)
+
+DEFAULT_PORT = 12000
 class Receptor:
     def __init__(self,serverPort):
         self.serverPort = serverPort
         self.tcp = socket(AF_INET, SOCK_DGRAM)
         self.tcp.bind(('', self.serverPort))
+        self.output_data = ""      
 
-        self.output_data = ""       #Tudo que o servidor recebeu
-
-        self.number_of_packages = 0 #Numero total de pacotes
-        self.extension = ""         #Extensao do arquivo (.mp3,.ppm,.jpg,.txt,etc)
-
-
-    def __read_number_packages(self):
-        self.number_of_packages = self.tcp.recvfrom(2048)
-        self.number_of_packages = int(self.number_of_packages[0])
+    def read_information(self):
+        information = self.tcp.recvfrom(2048)[0]
+        self.number_of_packages = int(information.split('|')[0])
+        self.frame_size = int(information.split('|')[1])
     
-    def __read_extension(self):
-        self.extension = self.tcp.recvfrom(2048)
-        self.extension = str(self.extension[0])
-
     def transmission(self):
-        self.__read_number_packages()
-        self.__read_extension()
+        try:
+            self.read_information()
+        except ImportError as e:
+            print("Error reading number of packets and frame size from file to be transmitted")
 
         i = 0
         while (i < self.number_of_packages):
             h = hashlib.new('md5')
-            frame, clientAddress = self.tcp.recvfrom(2048)
-            hash, clientAddress = self.tcp.recvfrom(2048)
+            frame, clientAddress = self.tcp.recvfrom(self.frame_size)
+            hash, clientAddress = self.tcp.recvfrom(self.frame_size)
 
             h.update(frame)
             check_hash = h.hexdigest()
@@ -51,11 +54,23 @@ class Receptor:
                 print ("Error block: {}".format(i))					
                 self.tcp.sendto("NACK",clientAddress)
 
+def add_arguments(parser):
+    parser.add_argument("--port", "-p", help="port", default=DEFAULT_PORT, type=int)
+    return parser
+
 def main():
+    parser = argparse.ArgumentParser(description='Receptor Socket UDP')
+    parser = add_arguments(parser)
+    args = parser.parse_args()
 
-    Socket = Receptor(12000)
-    Socket.transmission()
+    try:
+        receptor = Receptor(args.port)
+        receptor.transmission()
+        output = open(("Output"),"w")
+        output.write(receptor.output_data)
+    except ImportError as e:
+        print("Error while transmitting")
 
-    output = open(("Output.%s"%Socket.extension),"w")
-    output.write(Socket.output_data)
-main()
+
+if __name__ == '__main__':
+    exit(main())

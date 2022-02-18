@@ -23,6 +23,8 @@ Execution environment used and tested:
 
 **SO**: Ubuntu 20.04     **Kernel**: 5.8.0-63-generic
 
+**SO**: Linux Mint 20.2  **Kernel**: 5.4.0-80-generic
+
 
 
 
@@ -47,11 +49,11 @@ $ ./python receptor.py
 
 ```bash
 #Open a second CMD
-$ ./python transmissor.py -i input4.ppm -f 1024 -e 5
+$ ./python transmitter.py -i './inputs/input4.ppm' -f 1024 -e 5
 ```
 
 to transmit the file "input4.ppm" with frames (Packages) of 1024 Bytes and with a percentage of 5% of error.
 
 The sending status of each block will be displayed on the screen, and finally the total transmission time, number of errors and the number of blocks sent.
 
-The receiver generates a file with the name 'Output. (Input extension)' with all the content you received from transmitter.py
+The receiver generates a file with the name 'Output' with all the content you received from transmitter.py
