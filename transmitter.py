@@ -48,17 +48,17 @@ class Transmitter:
 		for i in range(0,self.data_size-1,self.frame_size):
 			self.number_of_packages += 1
 	
-	def check(self, transmission_check,aux):			
+	def check(self, transmission_check,block):			
 		if(transmission_check != " "):	
 			if(transmission_check == "ACK"):
-				print ("Sending: %s   Receptor: ACK" %aux)
+				print ("Sending Block: %i   Receptor: ACK" %block)
 			else:
 				if(transmission_check == "NACK"):
-					print ("Sending: %s   Receptor: NACK" %aux)
+					print ("Sending Block: %i   Receptor: NACK" %block)
 				else:
-					print ("Sending: %s   Receptor: NACK" %aux)
+					print ("Sending Block: %i   Receptor: NACK" %block)
 		else:
-			print ("Sending: %s   Receptor: NACK" %aux)	
+			print ("Sending Block %i   Receptor: NACK" %block)	
 	
 	def send(self):								
 
@@ -67,6 +67,8 @@ class Transmitter:
 			self.tcp.sendto(("%s|%s"%(self.number_of_packages,self.frame_size)),self.destiny)		
 		except ImportError as e:
 			print("Error sending number of packets and frame size from file to be transmitted")
+
+		block = 1
 
 		for i in range(0,self.data_size-1,self.frame_size):
 
@@ -83,7 +85,7 @@ class Transmitter:
 				self.tcp.sendto(aux,(self.destiny))			
 				self.tcp.sendto(h.hexdigest(),(self.destiny))
 				transmission_check, serverAddress = self.tcp.recvfrom(2048)	
-				self.check(transmission_check,aux)
+				self.check(transmission_check,block)
 			else:
 				while(waiting_time <= self.error_percentage):	
 					self.error_number += 1						
@@ -92,12 +94,13 @@ class Transmitter:
 					self.tcp.sendto(error_auxiliary,(self.destiny))
 					self.tcp.sendto(h.hexdigest(),(self.destiny))
 					transmission_check, serverAddress = self.tcp.recvfrom(2048)
-					self.check(transmission_check,aux)
+					self.check(transmission_check,block)
 
 				self.tcp.sendto(aux,(self.destiny))
 				self.tcp.sendto(h.hexdigest(),(self.destiny))
 				transmission_check, serverAddress = self.tcp.recvfrom(2048)
-				self.check(transmission_check,aux)
+				self.check(transmission_check,block)
+			block += 1
 
 	def close_socket(self):
 		self.tcp.close()

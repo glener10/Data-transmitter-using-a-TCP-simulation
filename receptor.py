@@ -47,11 +47,12 @@ class Receptor:
             check_hash = h.hexdigest()
             if(hash == check_hash):
                 self.output_data += frame
-                print ("Receives: {}  Hash: {}  Block: {}".format(frame,hash,i))	
+                #print ("Receives: {}  Hash: {}  Block: {}".format(frame,hash,i))	
+                print ("Block: {} - Hash: {}".format(i+1,hash))	
                 self.tcp.sendto("ACK",clientAddress)
                 i = i + 1
             else:
-                print ("Error block: {}".format(i))					
+                print ("Error block: {}".format(i+1))					
                 self.tcp.sendto("NACK",clientAddress)
 
 def add_arguments(parser):
