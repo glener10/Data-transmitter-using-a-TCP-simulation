@@ -2,31 +2,28 @@
 
 <p align="center"> 🚀Simple algorithm that simulates Socket TCP for transmitting different types of data... </p>
 
+<img src="/img/execution.jpg" alt="example"/>
 
 Table of Contents
 
 ===================
 
 <!--ts-->
-* [Environment](#Environment)
-* [Demo](#Demo)
 
+- [Environment](#Environment)
+- [Demo](#Demo)
 
 <!--te-->
 
 ===================
 
-
 # Environment
 
 Execution environment used and tested:
 
-**SO**: Ubuntu 20.04     **Kernel**: 5.8.0-63-generic
+**SO**: Ubuntu 20.04 **Kernel**: 5.8.0-63-generic
 
-**SO**: Linux Mint 20.2  **Kernel**: 5.4.0-80-generic
-
-
-
+**SO**: Linux Mint 20.2 **Kernel**: 5.4.0-80-generic
 
 # Demo
 
@@ -34,22 +31,20 @@ Through an input file it divides into blocks of optional size (Frames) and sends
 
 It can be used to test the transmission time, graphs with the amount of errors.
 
--f   __* frame size *__
+-f **Frame size**
 
--e __* Percentage of error *__
+-e **Percentage of error**
 
--i = __* input file (It must be inside the 'inputs' folder or edit the default path within the 'transmitter.py' file) *__
-
-
+-i = **Input file (It must be inside the 'inputs' folder or edit the default path within the 'transmitter.py' file)**
 
 ```bash
 #Open one CMD
-$ ./python receptor.py
+$ python receptor.py
 ```
 
 ```bash
 #Open a second CMD
-$ ./python transmitter.py -i './inputs/input4.ppm' -f 1024 -e 5
+$ python transmitter.py -i './inputs/input4.ppm' -f 1024 -e 5
 ```
 
 to transmit the file "input4.ppm" with frames (Packages) of 1024 Bytes and with a percentage of 5% of error.
